@@ -102,16 +102,12 @@
         .section-content {
             padding: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
             gap: 20px;
-            max-height: 10000px;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
         }
         
         .section-content.collapsed {
-            max-height: 0;
-            padding: 0 20px;
+            display: none;
         }
         
         .route-container {
@@ -145,8 +141,10 @@
             border-radius: 3px;
             max-height: 60px;
             overflow-y: auto;
+            overflow-x: auto;
             word-break: break-all;
             margin-bottom: 8px;
+            width: 100%;
         }
         
         .copy-btn {
@@ -190,7 +188,7 @@
             font-style: italic;
         }
         
-        @media (max-width: 1400px) {
+        @media (max-width: 1300px) {
             .section-content {
                 grid-template-columns: 1fr;
             }
@@ -220,15 +218,17 @@
     <script>
         const DATA_URL = 'https://script.google.com/macros/s/AKfycbyE5uQqUsAbtG7XJKVgy61sUetm1hNfHpnqBC-yOl6-_XGqy2LQdDh6KC_L6EqtjXwd/exec';
         
-        function copyToClipboard(embedCode, buttonElement) {
+        function copyToClipboard(index) {
+            const embedCode = window.routeEmbedCodes[index];
             navigator.clipboard.writeText(embedCode).then(() => {
-                const originalText = buttonElement.textContent;
-                buttonElement.textContent = '✓ Copied!';
-                buttonElement.classList.add('copied');
+                const button = document.getElementById('copy-btn-' + index);
+                const originalText = button.textContent;
+                button.textContent = '✓ Copied!';
+                button.classList.add('copied');
                 
                 setTimeout(() => {
-                    buttonElement.textContent = originalText;
-                    buttonElement.classList.remove('copied');
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
                 }, 2000);
             }).catch(err => {
                 alert('Failed to copy: ' + err);
@@ -242,12 +242,16 @@
                 const response = await fetch(DATA_URL);
                 const routes = await response.json();
                 
+                // Store embed codes globally for copy function
+                window.routeEmbedCodes = [];
+                
                 const grouped = {
                     'Mon/Wed Practice (Tam High)': [],
                     'Sunday Longer Practice (Depot)': []
                 };
                 
                 routes.forEach((route, index) => {
+                    window.routeEmbedCodes.push(route.embedCode);
                     route.routeId = index;
                     if (route.practiceType.includes('Mon/Wed')) {
                         grouped['Mon/Wed Practice (Tam High)'].push(route);
@@ -280,15 +284,13 @@
                                 .replace(/>/g, '&gt;')
                                 .replace(/"/g, '&quot;');
                             
-                            const safeEmbedCode = route.embedCode.replace(/'/g, "\\'").replace(/`/g, '\\`').replace(/\$/g, '\\$');
-                            
                             html += `
                                 <div class="route-container">
                                     ${route.embedCode}
                                     <div class="embed-code-section">
                                         <div class="embed-code-label">Embed Code:</div>
                                         <div class="embed-code-display">${escapedCode}</div>
-                                        <button class="copy-btn" onclick="copyToClipboard('${safeEmbedCode}', this)">
+                                        <button class="copy-btn" id="copy-btn-${route.routeId}" onclick="copyToClipboard(${route.routeId})">
                                             Copy Code
                                         </button>
                                     </div>
