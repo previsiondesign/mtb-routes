@@ -119,17 +119,48 @@
         
         .embed-code-section {
             margin-top: 15px;
-            padding: 10px;
-            background: #fff;
             border: 1px solid #ddd;
             border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .embed-code-header {
+            background: #f8f9fa;
+            padding: 8px 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        
+        .embed-code-header:hover {
+            background: #e9ecef;
         }
         
         .embed-code-label {
             font-size: 12px;
             font-weight: 600;
             color: #666;
-            margin-bottom: 5px;
+        }
+        
+        .embed-toggle-icon {
+            font-size: 0.9em;
+            color: #666;
+            transition: transform 0.3s;
+        }
+        
+        .embed-code-header.collapsed .embed-toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .embed-code-content {
+            padding: 10px;
+            background: #fff;
+        }
+        
+        .embed-code-content.collapsed {
+            display: none;
         }
         
         .embed-code-display {
@@ -235,6 +266,12 @@
             });
         }
         
+        function toggleEmbedCode(header) {
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            content.classList.toggle('collapsed');
+        }
+        
         async function loadRoutes() {
             const contentDiv = document.getElementById('content');
             
@@ -288,11 +325,16 @@
                                 <div class="route-container">
                                     ${route.embedCode}
                                     <div class="embed-code-section">
-                                        <div class="embed-code-label">Embed Code:</div>
-                                        <div class="embed-code-display">${escapedCode}</div>
-                                        <button class="copy-btn" id="copy-btn-${route.routeId}" onclick="copyToClipboard(${route.routeId})">
-                                            Copy Code
-                                        </button>
+                                        <div class="embed-code-header collapsed" onclick="toggleEmbedCode(this)">
+                                            <span class="embed-code-label">Embed Code</span>
+                                            <span class="embed-toggle-icon">▼</span>
+                                        </div>
+                                        <div class="embed-code-content collapsed">
+                                            <div class="embed-code-display">${escapedCode}</div>
+                                            <button class="copy-btn" id="copy-btn-${route.routeId}" onclick="copyToClipboard(${route.routeId})">
+                                                Copy Code
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             `;
@@ -335,4 +377,3 @@
     </script>
 </body>
 </html>
-
