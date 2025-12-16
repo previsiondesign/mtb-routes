@@ -19,7 +19,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             padding: 30px;
@@ -102,7 +102,7 @@
         .section-content {
             padding: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
             gap: 20px;
             max-height: 10000px;
             overflow: hidden;
@@ -190,11 +190,13 @@
             font-style: italic;
         }
         
-        @media (max-width: 768px) {
+        @media (max-width: 1400px) {
             .section-content {
                 grid-template-columns: 1fr;
             }
-            
+        }
+        
+        @media (max-width: 768px) {
             .container {
                 padding: 20px;
             }
@@ -216,7 +218,6 @@
     </div>
 
     <script>
-        // Replace this with your Apps Script web app URL
         const DATA_URL = 'https://script.google.com/macros/s/AKfycbyE5uQqUsAbtG7XJKVgy61sUetm1hNfHpnqBC-yOl6-_XGqy2LQdDh6KC_L6EqtjXwd/exec';
         
         function copyToClipboard(embedCode, buttonElement) {
@@ -241,7 +242,6 @@
                 const response = await fetch(DATA_URL);
                 const routes = await response.json();
                 
-                // Group routes by practice type
                 const grouped = {
                     'Mon/Wed Practice (Tam High)': [],
                     'Sunday Longer Practice (Depot)': []
@@ -249,7 +249,6 @@
                 
                 routes.forEach((route, index) => {
                     route.routeId = index;
-                    // Handle both naming variations
                     if (route.practiceType.includes('Mon/Wed')) {
                         grouped['Mon/Wed Practice (Tam High)'].push(route);
                     } else if (route.practiceType.includes('Sunday')) {
@@ -257,7 +256,6 @@
                     }
                 });
                 
-                // Build HTML
                 let html = '';
                 
                 for (const [practiceType, typeRoutes] of Object.entries(grouped)) {
@@ -276,12 +274,13 @@
                         html += '<div class="empty-state">No routes submitted yet</div>';
                     } else {
                         typeRoutes.forEach(route => {
-                            // Escape HTML for display
                             const escapedCode = route.embedCode
                                 .replace(/&/g, '&amp;')
                                 .replace(/</g, '&lt;')
                                 .replace(/>/g, '&gt;')
                                 .replace(/"/g, '&quot;');
+                            
+                            const safeEmbedCode = route.embedCode.replace(/'/g, "\\'").replace(/`/g, '\\`').replace(/\$/g, '\\$');
                             
                             html += `
                                 <div class="route-container">
@@ -289,7 +288,7 @@
                                     <div class="embed-code-section">
                                         <div class="embed-code-label">Embed Code:</div>
                                         <div class="embed-code-display">${escapedCode}</div>
-                                        <button class="copy-btn" onclick="copyToClipboard(\`${route.embedCode.replace(/`/g, '\\`')}\`, this)">
+                                        <button class="copy-btn" onclick="copyToClipboard('${safeEmbedCode}', this)">
                                             Copy Code
                                         </button>
                                     </div>
@@ -306,7 +305,6 @@
                 
                 contentDiv.innerHTML = html;
                 
-                // Load all Strava embed scripts dynamically
                 const scripts = contentDiv.querySelectorAll('script');
                 scripts.forEach(oldScript => {
                     const newScript = document.createElement('script');
@@ -331,7 +329,6 @@
             content.classList.toggle('collapsed');
         }
         
-        // Load routes on page load
         loadRoutes();
     </script>
 </body>
