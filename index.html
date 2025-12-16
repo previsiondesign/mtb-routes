@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MTB Practice Routes</title>
+    <title>Tam High MTB Practice Routes</title>
     <style>
         * {
             margin: 0;
@@ -80,6 +80,15 @@
             margin: 0;
         }
         
+        .route-count {
+            background: #2c5aa0;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        
         .toggle-icon {
             font-size: 1.2em;
             color: #666;
@@ -154,7 +163,7 @@
 <body>
     <div class="container">
         <h1>MTB Practice Routes</h1>
-        <p class="subtitle">Crowdsourced route library for organized rides</p>
+        <p class="subtitle">Crowdsourced route library for team rides</p>
         
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSdOdkgSMhHisEPjNY4XhWD50KZl0URE4FMXbO2R4dBaCljHiA/viewform" target="_blank" class="submit-link">
             📍 Submit a Route
@@ -167,7 +176,7 @@
 
     <script>
         // Replace this with your Apps Script web app URL
-        const DATA_URL = 'https://script.google.com/macros/s/AKfycbyvScmDME6VIwpEBuiGRiEQotXO84-qbgFSkphZzsHTd0XdUZtvABu1HtzKnmPFt3Mp/exec';
+        const DATA_URL = 'https://script.google.com/macros/s/AKfycbyE5uQqUsAbtG7XJKVgy61sUetm1hNfHpnqBC-yOl6-_XGqy2LQdDh6KC_L6EqtjXwd/exec';
         
         async function loadRoutes() {
             const contentDiv = document.getElementById('content');
@@ -179,12 +188,15 @@
                 // Group routes by practice type
                 const grouped = {
                     'Mon/Wed Practice (Tam High)': [],
-                    'Sunday Practice (Depot)': []
+                    'Sunday Longer Practice (Depot)': []
                 };
                 
                 routes.forEach(route => {
-                    if (grouped[route.practiceType]) {
-                        grouped[route.practiceType].push(route);
+                    // Handle both naming variations
+                    if (route.practiceType.includes('Mon/Wed')) {
+                        grouped['Mon/Wed Practice (Tam High)'].push(route);
+                    } else if (route.practiceType.includes('Sunday')) {
+                        grouped['Sunday Longer Practice (Depot)'].push(route);
                     }
                 });
                 
@@ -195,7 +207,9 @@
                     html += `
                         <div class="section">
                             <div class="section-header" onclick="toggleSection(this)">
-                                <h2>${practiceType}</h2>
+                                <div>
+                                    <h2>${practiceType}<span class="route-count">${typeRoutes.length}</span></h2>
+                                </div>
                                 <span class="toggle-icon">▼</span>
                             </div>
                             <div class="section-content">
@@ -225,8 +239,6 @@
                 contentDiv.innerHTML = `
                     <div class="error">
                         <strong>Error loading routes:</strong> ${error.message}
-                        <br><br>
-                        Make sure your Apps Script URL is correct and the deployment is set to "Anyone" access.
                     </div>
                 `;
             }
