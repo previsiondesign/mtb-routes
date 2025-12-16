@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tam High MTB Practice Routes</title>
+    <title>Tam High MTB Team Strava Practice Route Library</title>
     <style>
         * {
             margin: 0;
@@ -121,6 +121,54 @@
             border: 1px solid #e0e0e0;
         }
         
+        .embed-code-section {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .embed-code-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .embed-code-display {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #333;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 3px;
+            max-height: 60px;
+            overflow-y: auto;
+            word-break: break-all;
+            margin-bottom: 8px;
+        }
+        
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            width: 100%;
+        }
+        
+        .copy-btn:hover {
+            background: #218838;
+        }
+        
+        .copy-btn.copied {
+            background: #6c757d;
+        }
+        
         .loading {
             text-align: center;
             padding: 40px;
@@ -155,21 +203,36 @@
 </head>
 <body>
     <div class="container">
-        <h1>Tam High MTB Practice Routes</h1>
-        <p class="subtitle">Crowdsourced route library for organized team rides</p>
+        <h1>Tam High MTB Team Strava Practice Routes</h1>
+        <p class="subtitle">Crowdsourced route library for team practice rides.  Please review currently posted routes before posting to prevent duplicate routes.</p>
         
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSdOdkgSMhHisEPjNY4XhWD50KZl0URE4FMXbO2R4dBaCljHiA/viewform" target="_blank" class="submit-link">
-            📍 Submit a Route
+            📍 Submit your saved Strava route for consideration
         </a>
         
         <div id="content">
-            <div class="loading">Loading routes...</div>
+            <div class="loading">Loading Strava route library...</div>
         </div>
     </div>
 
     <script>
         // Replace this with your Apps Script web app URL
         const DATA_URL = 'https://script.google.com/macros/s/AKfycbyE5uQqUsAbtG7XJKVgy61sUetm1hNfHpnqBC-yOl6-_XGqy2LQdDh6KC_L6EqtjXwd/exec';
+        
+        function copyToClipboard(embedCode, buttonElement) {
+            navigator.clipboard.writeText(embedCode).then(() => {
+                const originalText = buttonElement.textContent;
+                buttonElement.textContent = '✓ Copied!';
+                buttonElement.classList.add('copied');
+                
+                setTimeout(() => {
+                    buttonElement.textContent = originalText;
+                    buttonElement.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                alert('Failed to copy: ' + err);
+            });
+        }
         
         async function loadRoutes() {
             const contentDiv = document.getElementById('content');
@@ -184,7 +247,8 @@
                     'Sunday Longer Practice (Depot)': []
                 };
                 
-                routes.forEach(route => {
+                routes.forEach((route, index) => {
+                    route.routeId = index;
                     // Handle both naming variations
                     if (route.practiceType.includes('Mon/Wed')) {
                         grouped['Mon/Wed Practice (Tam High)'].push(route);
@@ -212,9 +276,23 @@
                         html += '<div class="empty-state">No routes submitted yet</div>';
                     } else {
                         typeRoutes.forEach(route => {
+                            // Escape HTML for display
+                            const escapedCode = route.embedCode
+                                .replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;')
+                                .replace(/"/g, '&quot;');
+                            
                             html += `
                                 <div class="route-container">
                                     ${route.embedCode}
+                                    <div class="embed-code-section">
+                                        <div class="embed-code-label">Embed Code:</div>
+                                        <div class="embed-code-display">${escapedCode}</div>
+                                        <button class="copy-btn" onclick="copyToClipboard(\`${route.embedCode.replace(/`/g, '\\`')}\`, this)">
+                                            Copy Code
+                                        </button>
+                                    </div>
                                 </div>
                             `;
                         });
@@ -258,4 +336,3 @@
     </script>
 </body>
 </html>
-
