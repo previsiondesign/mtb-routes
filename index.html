@@ -159,6 +159,7 @@
             }
         }
     </style>
+<script src="https://strava-embeds.com/embed.js"></script>
 </head>
 <body>
     <div class="container">
@@ -175,7 +176,6 @@
     </div>
 
     <script>
-        // Replace this with your Apps Script web app URL
         const DATA_URL = 'https://script.google.com/macros/s/AKfycbyE5uQqUsAbtG7XJKVgy61sUetm1hNfHpnqBC-yOl6-_XGqy2LQdDh6KC_L6EqtjXwd/exec';
         
         async function loadRoutes() {
@@ -192,6 +192,10 @@
                 };
                 
                 routes.forEach(route => {
+                    // Clean the embed code - remove the script tag since we load it globally
+                    const cleanedEmbedCode = route.embedCode.replace(/<script[^>]*>.*?<\/script>/gi, '');
+                    route.cleanedEmbedCode = cleanedEmbedCode;
+                    
                     // Handle both naming variations
                     if (route.practiceType.includes('Mon/Wed')) {
                         grouped['Mon/Wed Practice (Tam High)'].push(route);
@@ -221,7 +225,7 @@
                         typeRoutes.forEach(route => {
                             html += `
                                 <div class="route-container">
-                                    ${route.embedCode}
+                                    ${route.cleanedEmbedCode}
                                 </div>
                             `;
                         });
@@ -234,6 +238,11 @@
                 }
                 
                 contentDiv.innerHTML = html;
+                
+                // Trigger Strava embed rendering
+                if (window.StravaEmbed) {
+                    window.StravaEmbed.init();
+                }
                 
             } catch (error) {
                 contentDiv.innerHTML = `
@@ -255,3 +264,4 @@
     </script>
 </body>
 </html>
+
