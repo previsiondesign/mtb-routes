@@ -121,13 +121,6 @@
             border: 1px solid #e0e0e0;
         }
         
-        .route-container iframe {
-            width: 100%;
-            height: 400px;
-            border: none;
-            border-radius: 3px;
-        }
-        
         .loading {
             text-align: center;
             padding: 40px;
@@ -159,12 +152,11 @@
             }
         }
     </style>
-<script src="https://strava-embeds.com/embed.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Submitted Tam High MTB Practice Routes</h1>
-        <p class="subtitle">Crowdsourced route library/suggestions for our team rides</p>
+        <h1>Tam High MTB Practice Routes</h1>
+        <p class="subtitle">Crowdsourced route library for organized team rides</p>
         
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSdOdkgSMhHisEPjNY4XhWD50KZl0URE4FMXbO2R4dBaCljHiA/viewform" target="_blank" class="submit-link">
             📍 Submit a Route
@@ -176,7 +168,8 @@
     </div>
 
     <script>
-        const DATA_URL = 'https://script.google.com/macros/s/AKfycbyE5uQqUsAbtG7XJKVgy61sUetm1hNfHpnqBC-yOl6-_XGqy2LQdDh6KC_L6EqtjXwd/exec';
+        // Replace this with your Apps Script web app URL
+        const DATA_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
         
         async function loadRoutes() {
             const contentDiv = document.getElementById('content');
@@ -192,10 +185,6 @@
                 };
                 
                 routes.forEach(route => {
-                    // Clean the embed code - remove the script tag since we load it globally
-                    const cleanedEmbedCode = route.embedCode.replace(/<script[^>]*>.*?<\/script>/gi, '');
-                    route.cleanedEmbedCode = cleanedEmbedCode;
-                    
                     // Handle both naming variations
                     if (route.practiceType.includes('Mon/Wed')) {
                         grouped['Mon/Wed Practice (Tam High)'].push(route);
@@ -225,7 +214,7 @@
                         typeRoutes.forEach(route => {
                             html += `
                                 <div class="route-container">
-                                    ${route.cleanedEmbedCode}
+                                    ${route.embedCode}
                                 </div>
                             `;
                         });
@@ -239,10 +228,15 @@
                 
                 contentDiv.innerHTML = html;
                 
-                // Trigger Strava embed rendering
-                if (window.StravaEmbed) {
-                    window.StravaEmbed.init();
-                }
+                // Load all Strava embed scripts dynamically
+                const scripts = contentDiv.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    newScript.src = oldScript.src;
+                    if (oldScript.src) {
+                        document.body.appendChild(newScript);
+                    }
+                });
                 
             } catch (error) {
                 contentDiv.innerHTML = `
@@ -264,5 +258,3 @@
     </script>
 </body>
 </html>
-
-
